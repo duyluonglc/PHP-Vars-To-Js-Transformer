@@ -1,6 +1,6 @@
 <?php
 
-namespace Laracasts\Utilities\JavaScript;
+namespace JavaScript\Utilities\JavaScript;
 
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;

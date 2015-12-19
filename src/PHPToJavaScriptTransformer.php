@@ -1,6 +1,6 @@
 <?php
 
-namespace Laracasts\Utilities\JavaScript;
+namespace JavaScript\Utilities\JavaScript;
 
 use stdClass;
 use Exception;

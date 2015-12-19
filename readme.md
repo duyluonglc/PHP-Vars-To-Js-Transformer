@@ -15,17 +15,20 @@ Begin by installing this package through Composer.
 
 ```js
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/duyluonglc/PHP-Vars-To-Js-Transformer"
+        }
+    ],
     "require": {
-		"laracasts/utilities": "~2.0"
+        ...............
+		"javascript/utilities": "dev-master"
 	}
 }
 ```
 
-> If you use Laravel 4: instead install `~1.0` of this package (and use the documentation for that release). For Laravel 5 (or non-Laravel), `~2.0` will do the trick!
-
-### Laravel Users
-
-If you are a Laravel user, there is a service provider you can make use of to automatically prepare the bindings and such.
+### Laravel 5.1 Users
 
 ```php
 
@@ -33,7 +36,7 @@ If you are a Laravel user, there is a service provider you can make use of to au
 
 'providers' => [
     '...',
-    'Laracasts\Utilities\JavaScript\JavaScriptServiceProvider'
+    'JavaScript\Utilities\JavaScript\JavaScriptServiceProvider'
 ];
 ```
 
