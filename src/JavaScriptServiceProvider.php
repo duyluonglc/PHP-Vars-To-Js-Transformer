@@ -1,6 +1,6 @@
 <?php
 
-namespace Laracasts\Utilities\JavaScript;
+namespace JavaScript\Utilities\JavaScript;
 
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
@@ -38,7 +38,7 @@ class JavaScriptServiceProvider extends ServiceProvider
 
         AliasLoader::getInstance()->alias(
             'JavaScript',
-            'Laracasts\Utilities\JavaScript\JavaScriptFacade'
+            'JavaScript\Utilities\JavaScript\JavaScriptFacade'
         );
     }
 
