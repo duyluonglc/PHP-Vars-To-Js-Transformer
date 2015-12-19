@@ -16,11 +16,10 @@ class JavaScriptServiceProvider extends ServiceProvider
     {
         $this->app->singleton('JavaScript', function ($app) {
             $view = config('javascript.bind_js_vars_to_this_view');
-            $namespace = config('javascript.js_namespace');
-
-            $binder = new LaravelViewBinder($app['events'], $view);
-
-            return new PHPToJavaScriptTransformer($binder, $namespace);
+            $namespace = config('javascript.js_namespace');			
+			$useJquery = config('javascript.use_jquery_extend');
+			
+            return new PHPToJavaScriptTransformer($namespace, $useJquery);
         });
 
         $this->mergeConfigFrom(

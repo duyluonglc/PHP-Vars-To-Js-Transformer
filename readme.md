@@ -7,6 +7,8 @@ to your JavaScript. Traditionally, this can be a bit of a pain - especially as y
 
 This package simplifies the process drastically.
 
+This source fo
+
 ## Installation
 
 Begin by installing this package through Composer.
@@ -46,11 +48,23 @@ public function index()
         'age' => 29
     ]);
 
+    JavaScript::put('messages', ['hello', 'hi']);
+
     return View::make('hello');
 }
 ```
 
 > In Laravel 5, of course add `use JavaScript;` to the top of your controller.
+
+Add render() to export variables to views. For example:
+
+```
+<body>
+    <h1>My Page</h1>
+
+    {!! JavaScript::render() !!} // <-- Variables prepended to this view
+</body>
+```
 
 Using the code above, you'll now be able to access `foo`, `user`, and `age` from your JavaScript.
 
@@ -58,17 +72,9 @@ Using the code above, you'll now be able to access `foo`, `user`, and `age` from
 console.log(foo); // bar
 console.log(user); // User Obj
 console.log(age); // 29
+console.log(messages); //array of messages
 ```
-
-This package, by default, binds your JavaScript variables to a "footer" view, which you will include. For example:
-
-```
-<body>
-    <h1>My Page</h1>
-
-    @include ('footer') // <-- Variables prepended to this view
-</body>
-```
+I use jquery extend object to keep existing attributes
 
 Naturally, you can change this default to a different view. See below.
 
@@ -89,17 +95,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | View to Bind JavaScript Vars To
-    |--------------------------------------------------------------------------
-    |
-    | Set this value to the name of the view (or partial) that
-    | you want to prepend all JavaScript variables to.
-    |
-    */
-    'bind_js_vars_to_this_view' => 'footer',
-
-    /*
-    |--------------------------------------------------------------------------
     | JavaScript Namespace
     |--------------------------------------------------------------------------
     |
@@ -108,63 +103,21 @@ return [
     | That way, you can access vars, like "SomeNamespace.someVariable."
     |
     */
-    'js_namespace' => 'window'
+    'js_namespace' => 'window',
+	
+	/*
+    |--------------------------------------------------------------------------
+    | Use jquery extend
+    |--------------------------------------------------------------------------
+    |
+    | Use jquery to extend object then existing attributes will not be removed
+    |
+    */
+    'use_jquery_extend' => 'true',
 
+    
 ];
 ```
 
-#### bind_js_vars_to_this_view
-
-You need to update this file to specify which view you want your new JavaScript variables to be prepended to. Typically, your footer is a good place for this.
-
-If you include something like a `layouts/partials/footer` partial, where you store your footer and script references, then make the `bind_js_vars_to_this_view` key equal to that path. Behind the scenes, the Laravel implementation of this package will listen for when that view is composed, and essentially paste the JS variables within it.
-
-#### js_namespace
-
-By default, all JavaScript vars will be nested under the global `window` object. You'll likely want to change this. Update the
-`js_namespace` key with the name of your desired JavaScript namespace. It can be anything. Just remember: if you change this setting (which you should),
-then you'll access all JavaScript variables, like so:
-
-```js
-MyNewNamespace.varName
-```
-
-### Symfony2
-To use this component in Symfony2 applications you can try [this bundle](https://github.com/holyspecter/HospectPhpVarsToJsBundle), built on top of PHP-Vars-To-Js-Transformer.
-
-### Without Laravel
-
-If you're not using Laravel, then you'll need to hard-wire things yourself. (Or, feel free to submit a pull request with an implementation for your desired framework.)
-
-First, create an implementation of the `Laracasts\Utilities\JavaScript\ViewBinder` interface. This class is in charge of inserting the given JavaScript into your view/page.
-
-```php
-<?php
-
-class MyAppViewBinder implements Laracasts\Utilities\JavaScript\ViewBinder {
-
-    // $js will contain your JS-formatted variable initializations
-    public function bind($js)
-    {
-        // Do what you need to do to add this JavaScript to
-        // the appropriate place in your app.
-    }
-}
-```
-
-Next, put it all together:
-
-```php
-$binder = new MyAppViewBinder;
-$javascript = new PHPToJavaScriptTransformer($binder, 'window'); // change window to your desired namespace
-
-$javascript->put(['foo' => 'bar']);
-```
-
-Now, you can access `window.foo` from your JavaScript.
-
-Remember, though, this is only necessary if you aren't using Laravel. If you are, then just reference the service provider, as demonstrated above.
-
-## License
 
 [View the license](https://github.com/laracasts/PHP-Vars-To-Js-Transformer/blob/master/LICENSE) for this repo.

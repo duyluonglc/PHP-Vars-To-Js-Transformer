@@ -16,13 +16,6 @@ class PHPToJavaScriptTransformer
     protected $namespace;
 
     /**
-     * What binds the variables to the views.
-     *
-     * @var ViewBinder
-     */
-    protected $viewBinder;
-
-    /**
      * All transformable types.
      *
      * @var array
@@ -35,17 +28,28 @@ class PHPToJavaScriptTransformer
         'Boolean',
         'Null'
     ];
+	
+    /**
+     * Use jquery to extend objects
+     * @var bool
+     */
+	protected $useJquery;
 
     /**
-     * Create a new JS transformer instance.
-     *
-     * @param ViewBinder $viewBinder
-     * @param string     $namespace
+     * Array to keep all variables
+     * @var array
      */
-    function __construct(ViewBinder $viewBinder, $namespace = 'window')
+	protected $variables = [];
+	
+    /**
+     * Create a new JS transformer instance.
+     * @param string $namespace
+     * @param bool $useJquery
+     */
+    function __construct($namespace = 'window', $useJquery = false)
     {
-        $this->viewBinder = $viewBinder;
         $this->namespace = $namespace;
+		$this->useJquery = $useJquery;
     }
 
     /**
@@ -63,17 +67,21 @@ class PHPToJavaScriptTransformer
         } else {
             throw new Exception('Try JavaScript::put(["foo" => "bar"]');
         }
-
-        // First, we have to translate the variables
-        // to something JS-friendly.
-        $js = $this->buildJavaScriptSyntax($variables);
-
-        // And then we'll actually bind those
-        // variables to the view.
-        $this->viewBinder->bind($js);
-
-        return $js;
+		
+		$this->variables = array_merge($this->variables, $variables);
     }
+	
+    /**
+     * Make string javascript code
+     * @return string javascript
+     */
+	public function render() {
+		// First, we have to translate the variables
+        // to something JS-friendly.
+        $js = $this->buildJavaScriptSyntax($this->variables);
+
+        return "<script>{$js}</script>";
+	}
 
     /**
      * Translate the array of PHP vars to
@@ -116,7 +124,11 @@ class PHPToJavaScriptTransformer
      */
     protected function buildVariableInitialization($key, $value)
     {
-        return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
+		if($this->useJquery) {
+			return "{$this->namespace}.{$key} = {$this->namespace}.{$key} || {}; \$.extend(true, {$this->namespace}.{$key}, {$this->optimizeValueForJavaScript($value)});";
+		} else {
+			return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
+		}
     }
 
     /**

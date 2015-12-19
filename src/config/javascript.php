@@ -1,20 +1,7 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | View to Bind JavaScript Vars To
-    |--------------------------------------------------------------------------
-    |
-    | Set this value to the name of the view (or partial) that
-    | you want to prepend all JavaScript variables to.
-    | This can be a single view, or an array of views.
-    | Example: 'footer' or ['footer', 'bottom']
-    |
-    */
-    'bind_js_vars_to_this_view' => 'footer',
-
+    
     /*
     |--------------------------------------------------------------------------
     | JavaScript Namespace
@@ -25,6 +12,16 @@ return [
     | That way, you can access vars, like "SomeNamespace.someVariable."
     |
     */
-    'js_namespace' => 'window'
+    'js_namespace' => 'window',
+	
+	/*
+      |--------------------------------------------------------------------------
+      | Use jquery extend
+      |--------------------------------------------------------------------------
+      |
+      | Use jquery to extend object then existing attributes will not be removed
+      |
+     */
+    'use_jquery_extend' => 'true',
 
 ];
