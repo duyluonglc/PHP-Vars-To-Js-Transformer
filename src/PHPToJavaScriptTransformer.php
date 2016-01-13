@@ -28,7 +28,7 @@ class PHPToJavaScriptTransformer
         'Boolean',
         'Null'
     ];
-	
+
     /**
      * Use jquery to extend objects
      * @var bool
@@ -40,7 +40,7 @@ class PHPToJavaScriptTransformer
      * @var array
      */
 	protected $variables = [];
-	
+
     /**
      * Create a new JS transformer instance.
      * @param string $namespace
@@ -67,10 +67,10 @@ class PHPToJavaScriptTransformer
         } else {
             throw new Exception('Try JavaScript::put(["foo" => "bar"]');
         }
-		
+
 		$this->variables = array_merge($this->variables, $variables);
     }
-	
+
     /**
      * Make string javascript code
      * @return string javascript
@@ -125,7 +125,11 @@ class PHPToJavaScriptTransformer
     protected function buildVariableInitialization($key, $value)
     {
 		if($this->useJquery) {
-			return "{$this->namespace}.{$key} = {$this->namespace}.{$key} || {}; \$.extend(true, {$this->namespace}.{$key}, {$this->optimizeValueForJavaScript($value)});";
+            if(is_array($value) && array_keys($value) !== range(0, count($value) - 1)) {
+                return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
+            } else {
+                return "{$this->namespace}.{$key} = {$this->namespace}.{$key} || {}; \$.extend(true, {$this->namespace}.{$key}, {$this->optimizeValueForJavaScript($value)});";
+            }
 		} else {
 			return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
 		}
