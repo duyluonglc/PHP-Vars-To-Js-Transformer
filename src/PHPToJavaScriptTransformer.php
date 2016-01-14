@@ -125,7 +125,7 @@ class PHPToJavaScriptTransformer
     protected function buildVariableInitialization($key, $value)
     {
 		if($this->useJquery) {
-            if(is_array($value) && array_keys($value) !== range(0, count($value) - 1)) {
+            if(is_array($value) && array_keys($value) === range(0, count($value) - 1)) {
                 return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
             } else {
                 return "{$this->namespace}.{$key} = {$this->namespace}.{$key} || {}; \$.extend(true, {$this->namespace}.{$key}, {$this->optimizeValueForJavaScript($value)});";
