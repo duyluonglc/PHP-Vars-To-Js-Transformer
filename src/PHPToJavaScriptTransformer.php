@@ -6,8 +6,8 @@ use stdClass;
 use Exception;
 use JsonSerializable;
 
-class PHPToJavaScriptTransformer
-{
+class PHPToJavaScriptTransformer {
+
     /**
      * The namespace to nest JS vars under.
      *
@@ -33,31 +33,29 @@ class PHPToJavaScriptTransformer
      * Use jquery to extend objects
      * @var bool
      */
-	protected $useJquery;
+    protected $useJquery;
 
     /**
      * Array to keep all variables
      * @var array
      */
-	protected $variables = [];
+    protected $variables = [];
+    protected $extendVariables = [];
 
     /**
      * Create a new JS transformer instance.
      * @param string $namespace
      * @param bool $useJquery
      */
-    function __construct($namespace = 'window', $useJquery = false)
-    {
+    function __construct($namespace = 'window') {
         $this->namespace = $namespace;
-		$this->useJquery = $useJquery;
     }
 
     /**
      * Bind the given array of variables to the view.
      *
      */
-    public function put()
-    {
+    public function put() {
         $arguments = func_get_args();
 
         if (is_array($arguments[0])) {
@@ -68,20 +66,34 @@ class PHPToJavaScriptTransformer
             throw new Exception('Try JavaScript::put(["foo" => "bar"]');
         }
 
-		$this->variables = array_merge($this->variables, $variables);
+        $this->variables = array_merge($this->variables, $variables);
+    }
+
+    public function extend() {
+        $arguments = func_get_args();
+
+        if (is_array($arguments[0])) {
+            $variables = $arguments[0];
+        } elseif (count($arguments) == 2) {
+            $variables = [$arguments[0] => $arguments[1]];
+        } else {
+            throw new Exception('Try JavaScript::put(["foo" => "bar"]');
+        }
+
+        $this->extendVariables = array_merge($this->extendVariables, $variables);
     }
 
     /**
      * Make string javascript code
      * @return string javascript
      */
-	public function render() {
-		// First, we have to translate the variables
+    public function render() {
+        // First, we have to translate the variables
         // to something JS-friendly.
         $js = $this->buildJavaScriptSyntax($this->variables);
 
         return "<script>{$js}</script>";
-	}
+    }
 
     /**
      * Translate the array of PHP vars to
@@ -90,12 +102,14 @@ class PHPToJavaScriptTransformer
      * @param  array $vars
      * @return array
      */
-    public function buildJavaScriptSyntax(array $vars)
-    {
+    public function buildJavaScriptSyntax() {
         $js = $this->buildNamespaceDeclaration();
 
-        foreach ($vars as $key => $value) {
+        foreach ($this->variables as $key => $value) {
             $js .= $this->buildVariableInitialization($key, $value);
+        }
+        foreach ($this->extendVariables as $key => $value) {
+            $js .= $this->buildVariableInitialization($key, $value, true);
         }
 
         return $js;
@@ -106,8 +120,7 @@ class PHPToJavaScriptTransformer
      *
      * @return string
      */
-    protected function buildNamespaceDeclaration()
-    {
+    protected function buildNamespaceDeclaration() {
         if ($this->namespace == 'window') {
             return '';
         }
@@ -122,17 +135,12 @@ class PHPToJavaScriptTransformer
      * @param  string $value
      * @return string
      */
-    protected function buildVariableInitialization($key, $value)
-    {
-		if($this->useJquery) {
-            if(is_array($value) && array_keys($value) === range(0, count($value) - 1)) {
-                return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
-            } else {
-                return "{$this->namespace}.{$key} = {$this->namespace}.{$key} || {}; \$.extend(true, {$this->namespace}.{$key}, {$this->optimizeValueForJavaScript($value)});";
-            }
-		} else {
-			return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
-		}
+    protected function buildVariableInitialization($key, $value, $extend = false) {
+        if ($extend) {
+            return "{$this->namespace}.{$key} = {$this->namespace}.{$key} || {}; \$.extend(true, {$this->namespace}.{$key}, {$this->optimizeValueForJavaScript($value)});";
+        } else {
+            return "{$this->namespace}.{$key} = {$this->optimizeValueForJavaScript($value)};";
+        }
     }
 
     /**
@@ -142,15 +150,14 @@ class PHPToJavaScriptTransformer
      * @throws Exception
      * @return string
      */
-    protected function optimizeValueForJavaScript($value)
-    {
+    protected function optimizeValueForJavaScript($value) {
         // For every transformable type, let's see if
         // it needs to be transformed for JS-use.
 
         foreach ($this->types as $transformer) {
             $js = $this->{"transform{$transformer}"}($value);
 
-            if ( ! is_null($js)) {
+            if (!is_null($js)) {
                 return $js;
             }
         }
@@ -162,8 +169,7 @@ class PHPToJavaScriptTransformer
      * @param  string $value
      * @return string
      */
-    protected function transformString($value)
-    {
+    protected function transformString($value) {
         if (is_string($value)) {
             return "'{$this->escape($value)}'";
         }
@@ -175,8 +181,7 @@ class PHPToJavaScriptTransformer
      * @param  array $value
      * @return string
      */
-    protected function transformArray($value)
-    {
+    protected function transformArray($value) {
         if (is_array($value)) {
             return json_encode($value);
         }
@@ -188,8 +193,7 @@ class PHPToJavaScriptTransformer
      * @param  mixed $value
      * @return mixed
      */
-    protected function transformNumeric($value)
-    {
+    protected function transformNumeric($value) {
         if (is_numeric($value)) {
             return $value;
         }
@@ -201,8 +205,7 @@ class PHPToJavaScriptTransformer
      * @param  boolean $value
      * @return string
      */
-    protected function transformBoolean($value)
-    {
+    protected function transformBoolean($value) {
         if (is_bool($value)) {
             return $value ? 'true' : 'false';
         }
@@ -213,9 +216,8 @@ class PHPToJavaScriptTransformer
      * @return string
      * @throws Exception
      */
-    protected function transformObject($value)
-    {
-        if ( ! is_object($value)) {
+    protected function transformObject($value) {
+        if (!is_object($value)) {
             return;
         }
 
@@ -231,7 +233,7 @@ class PHPToJavaScriptTransformer
 
         // Otherwise, if the object doesn't even have a
         // __toString() method, we can't proceed.
-        if ( ! method_exists($value, '__toString')) {
+        if (!method_exists($value, '__toString')) {
             throw new Exception('Cannot transform this object to JavaScript.');
         }
 
@@ -244,8 +246,7 @@ class PHPToJavaScriptTransformer
      * @param  mixed $value
      * @return string
      */
-    protected function transformNull($value)
-    {
+    protected function transformNull($value) {
         if (is_null($value)) {
             return 'null';
         }
@@ -257,8 +258,8 @@ class PHPToJavaScriptTransformer
      * @param  string $value
      * @return string
      */
-    protected function escape($value)
-    {
+    protected function escape($value) {
         return str_replace(["\\", "'"], ["\\\\", "\'"], $value);
     }
+
 }

@@ -77,13 +77,11 @@ console.log(user); // User Obj
 console.log(age); // 29
 console.log(messages); //array of messages
 ```
-I use jquery extend object to keep existing attributes
+You can use jquery to extend objects and keep existing attributes by call Javascript::extend($var) instead use put method
 
-Naturally, you can change this default to a different view. See below.
+You can change default namespace = window of variables by change config. See below.
 
 ### Defaults
-
-If using Laravel, there are only two configuration options that you'll need to worry about. First, publish the default configuration.
 
 ```bash
 php artisan vendor:publish
@@ -107,20 +105,6 @@ return [
     |
     */
     'js_namespace' => 'window',
-	
-	/*
-    |--------------------------------------------------------------------------
-    | Use jquery extend
-    |--------------------------------------------------------------------------
-    |
-    | Use jquery to extend object then existing attributes will not be removed
-    |
-    */
-    'use_jquery_extend' => 'true',
-
     
 ];
 ```
-
-
-[View the license](https://github.com/laracasts/PHP-Vars-To-Js-Transformer/blob/master/LICENSE) for this repo.
