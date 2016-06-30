@@ -1,5 +1,5 @@
 {
-    "name": "javascript/utilities",
+    "name": "javascript/put-vars",
     "description": "Transform your PHP to JavaScript",
     "keywords": ["laravel", "javascript"],
     "license": "MIT",
